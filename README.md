@@ -1,16 +1,10 @@
 # PestSearch AI (害虫検索 AI)
 
-商談や現場ヒアリング中の会話をリアルタイムで音声認識・テキスト解析し、文脈に応じた害虫対策マニュアルや殺虫剤のSDS（安全データシート）を自動サジェストするWebアプリケーションです。
+商談や現場の会話をリアルタイムで音声認識し、文脈に応じた資料を自動サジェストするWebアプリケーションです。
 
 
 
 ---
-
-## URL
-
-このURLで試すことができます：  
-[https://pest-search-ai.streamlit.app/](https://pest-search-ai-9esymnxmttnah3xc55zf4r.streamlit.app/)
-
 
 
 
@@ -25,6 +19,12 @@
 顧客との会話を聞き取り、必要な資料をリアルタイムで自動提示することで、営業担当者が検索操作に意識を奪われることなくスムーズな提案と商談成立に集中できる環境を実現します。
 
 
+
+
+## URL
+
+このURLで試すことができます：  
+[https://pest-search-ai.streamlit.app/](https://pest-search-ai-9esymnxmttnah3xc55zf4r.streamlit.app/)
 
 
 
