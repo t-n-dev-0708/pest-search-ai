@@ -1,5 +1,11 @@
 id,file_name,keywords,thumbnail_path,pdf_path
-1,ゴキブリ駆除マニュアル_基本編.pdf,ゴキブリ ごきぶり 駆除 マニュアル 対策,dummy_data/thumbnails/thumb_roach.png,dummy_data/pdfs/doc_roach.pdf
-2,アリ侵入経路_調査レポート_2026.pdf,アリ 蟻 シロアリ 調査 レポート,dummy_data/thumbnails/thumb_ant.png,dummy_data/pdfs/doc_ant.pdf
-3,ユスリカ発生源_特定と対策.pdf,ユスリカ コバエ 発生源 水回り,dummy_data/thumbnails/thumb_midge.png,dummy_data/pdfs/doc_midge.pdf
-4,害虫駆除_法人向け料金表_最新版.pdf,料金 見積もり 法人 ゴキブリ アリ ユスリカ,dummy_data/thumbnails/thumb_price.png,dummy_data/pdfs/doc_price.pdf
+1,ゴキブリ駆除マニュアル_基本編.pdf,ゴキブリ チャバネ ベイト剤 駆除 対策 毒餌,dummy_data/thumbnails/thumb_roach.png,dummy_data/pdfs/roach_manual.pdf
+2,害虫駆除_法人向け料金表_最新版.pdf,料金 価格 定価 法人 契約 ゴキブリ アリ 駆除,dummy_data/thumbnails/thumb_price.png,dummy_data/pdfs/price_list.pdf
+3,アリ侵入経路_調査レポート_2026.pdf,アリ クロアリ アルゼンチンアリ 侵入 調査 巣 巣穴,dummy_data/thumbnails/thumb_ant.png,dummy_data/pdfs/ant_report.pdf
+4,ユスリカ発生源対策マニュアル.pdf,ユスリカ 飛来 駆除 水生 幼虫 薬剤 排水溝 殺虫剤,dummy_data/thumbnails/thumb_midge.png,dummy_data/pdfs/midge_manual.pdf
+5,ネズミ防除作業手順書_IPM対応.pdf,ネズミ クマネズミ 粘着シート 毒餌 封鎖 侵入防止 駆除,dummy_data/thumbnails/thumb_rat.png,dummy_data/pdfs/rat_procedure.pdf
+6,スズメバチ駆除安全管理ガイダンス.pdf,ハチ スズメバチ アシナガバチ 防護服 蜂の巣 刺傷 危険 駆除,dummy_data/thumbnails/thumb_wasp.png,dummy_data/pdfs/wasp_guidance.pdf
+7,トコジラミ初期対応および加熱施工マニュアル.pdf,トコジラミ ナンキンムシ ホテル 客室 スチーム 熱乾燥 駆除 刺され,dummy_data/thumbnails/thumb_bedbug.png,dummy_data/pdfs/bedbug_manual.pdf
+8,コバエ・ショウジョウバエ発生抑制シート.pdf,ハエ コバエ ショウジョウバエ 厨房 衛生 グリストラップ 防除,dummy_data/thumbnails/thumb_fly.png,dummy_data/pdfs/fly_sheet.pdf
+9,シロアリ予防および床下点検ガイド.pdf,シロアリ 木材 予防 床下 土壌処理 薬剤 木部 建築,dummy_data/thumbnails/thumb_termite.png,dummy_data/pdfs/termite_guide.pdf
+10,薬剤安全データシート_SDSまとめ.pdf,薬剤 SDS 成分 安全性 毒性 希釈 噴霧 毒物 薬液 料金,dummy_data/thumbnails/thumb_sds.png,dummy_data/pdfs/sds_summary.pdf
