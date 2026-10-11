@@ -1,1 +1,5 @@
-
+id,file_name,keywords,thumbnail_path,pdf_path
+1,ゴキブリ駆除マニュアル_基本編.pdf,ゴキブリ ごきぶり 駆除 マニュアル 対策,dummy_data/thumbnails/thumb_roach.png,dummy_data/pdfs/doc_roach.pdf
+2,アリ侵入経路_調査レポート_2026.pdf,アリ 蟻 シロアリ 調査 レポート,dummy_data/thumbnails/thumb_ant.png,dummy_data/pdfs/doc_ant.pdf
+3,ユスリカ発生源_特定と対策.pdf,ユスリカ コバエ 発生源 水回り,dummy_data/thumbnails/thumb_midge.png,dummy_data/pdfs/doc_midge.pdf
+4,害虫駆除_法人向け料金表_最新版.pdf,料金 見積もり 法人 ゴキブリ アリ ユスリカ,dummy_data/thumbnails/thumb_price.png,dummy_data/pdfs/doc_price.pdf
