@@ -9,34 +9,43 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- カスタムCSS（ミニマル化＆レイアウト調整） ---
+# --- カスタムCSS（見切れ防止・アバター削除・枠内収容） ---
 st.markdown("""
 <style>
-/* 画面上部の余白を削減 */
+/* ページ上部の見切れ防止パディング */
 .block-container {
-    padding-top: 1.5rem;
-    padding-bottom: 1rem;
+    padding-top: 2.5rem !important;
+    padding-bottom: 1rem !important;
 }
-/* 左側サジェストカード */
-.suggest-card {
+
+/* アバターアイコンを完全非表示 */
+[data-testid="stChatMessageAvatar"] {
+    display: none !important;
+}
+
+/* チャットメッセージのスタイル調整 */
+[data-testid="stChatMessage"] {
+    padding: 8px 12px;
     background-color: #1E1E2E;
     border-radius: 6px;
-    padding: 12px;
-    border: 1px solid #313244;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
+
+/* カード内のプレースホルダー */
 .no-image-box {
     background-color: #181825;
-    height: 150px;
+    height: 130px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 4px;
     margin-bottom: 8px;
-    color: #6C7086;
+    color: #585B70;
     font-size: 11px;
-    border: 1px dashed #45475A;
+    border: 1px dashed #313244;
 }
+
+/* カード内のファイル名テキスト */
 .file-name-label {
     font-size: 12px;
     font-weight: 600;
@@ -47,6 +56,8 @@ st.markdown("""
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* ボタンの幅をカード内にフィットさせる */
 .stDownloadButton button, .stButton button {
     width: 100%;
     font-size: 12px;
@@ -71,77 +82,83 @@ if "latest_suggested" not in st.session_state:
     st.session_state.latest_suggested = pd.DataFrame()
 
 # ミニマルヘッダー
-st.markdown("<h3 style='margin-bottom:0px; font-size:18px;'>PestSearch AI</h3>", unsafe_allow_html=True)
-st.markdown("<p style='color:#888; font-size:12px; margin-bottom:15px;'>リアルタイム会話分析・資料常時サジェスト</p>", unsafe_allow_html=True)
+st.markdown("<h3 style='margin-bottom:0px; font-size:18px; font-weight:700;'>PestSearch AI</h3>", unsafe_allow_html=True)
+st.markdown("<p style='color:#7F849C; font-size:12px; margin-bottom:20px;'>リアルタイム会話分析・資料常時サジェスト</p>", unsafe_allow_html=True)
 
-# 2カラム構造（左: 広いメインエリア / 右: 縦長会話エリア）
+# 2カラムレイアウト（左7 : 右3）
 col_left, col_right = st.columns([7, 3])
 
 # --- 左カラム：検出資料の表示エリア ---
 with col_left:
-    st.markdown("**検出資料**")
+    st.markdown("<span style='font-size:14px; font-weight:600;'>検出資料</span>", unsafe_allow_html=True)
+    st.write("")
     
     if st.session_state.latest_suggested.empty:
         st.info("右側の会話からキーワードが検出されると、ここに資料が自動表示されます。")
     else:
         suggested = st.session_state.latest_suggested
-        cols = st.columns(3) # 3列でカードを表示
+        # 4列固定のグリッド配置
+        cols = st.columns(4)
         
         for idx, row in suggested.reset_index().iterrows():
-            col_idx = idx % 3
-            with cols[col_idx]:
-                st.markdown('<div class="suggest-card">', unsafe_allow_html=True)
-                st.markdown(f'<span class="file-name-label" title="{row["file_name"]}">{row["file_name"]}</span>', unsafe_allow_html=True)
-                
-                try:
-                    img = Image.open(row['thumbnail_path'])
-                    st.image(img, use_container_width=True)
-                except:
-                    st.markdown('<div class="no-image-box">PREVIEW NO IMAGE</div>', unsafe_allow_html=True)
-                
-                try:
-                    with open(row['pdf_path'], "rb") as f:
-                        st.download_button(
-                            label="ファイルを開く",
-                            data=f,
-                            file_name=row['file_name'],
-                            mime="application/pdf",
-                            key=f"dl_{row['id']}_{time.time()}_{idx}",
-                            use_container_width=True
-                        )
-                except:
-                    st.button("ファイルなし", disabled=True, key=f"dl_err_{row['id']}_{time.time()}_{idx}", use_container_width=True)
-                
-                st.markdown('</div>', unsafe_allow_html=True)
+            if idx >= 4:
+                break
+            with cols[idx]:
+                # Streamlit標準の枠付きコンテナ内にすべての要素を確実に収める
+                with st.container(border=True):
+                    # 1. ファイル名
+                    st.markdown(f'<span class="file-name-label" title="{row["file_name"]}">{row["file_name"]}</span>', unsafe_allow_html=True)
+                    
+                    # 2. サムネイル / プレビュー枠
+                    try:
+                        img = Image.open(row['thumbnail_path'])
+                        st.image(img, use_container_width=True)
+                    except:
+                        st.markdown('<div class="no-image-box">NO PREVIEW</div>', unsafe_allow_html=True)
+                    
+                    # 3. アクションボタン
+                    try:
+                        with open(row['pdf_path'], "rb") as f:
+                            st.download_button(
+                                label="開く",
+                                data=f,
+                                file_name=row['file_name'],
+                                mime="application/pdf",
+                                key=f"dl_{row['id']}_{time.time()}_{idx}",
+                                use_container_width=True
+                            )
+                    except:
+                        st.button("未準備", disabled=True, key=f"dl_err_{row['id']}_{time.time()}_{idx}", use_container_width=True)
 
-# --- 右カラム：会話ログ・キーワード入力 ---
+# --- 右カラム：会話ログ・入力エリア ---
 with col_right:
-    st.markdown("**会話ログ**")
+    st.markdown("<span style='font-size:14px; font-weight:600;'>会話ログ</span>", unsafe_allow_html=True)
+    st.write("")
     
     if st.button("ログ消去", use_container_width=True):
         st.session_state.messages = []
         st.session_state.latest_suggested = pd.DataFrame()
         st.rerun()
 
-    # 縦長の会話ログ表示エリア（スクロール可能）
-    chat_container = st.container(height=480)
+    # 固定高（500px）のスクロールエリア
+    chat_container = st.container(height=500)
     with chat_container:
         for message in st.session_state.messages:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
 
-    # 会話・キーワードの入力欄
+    # キーワード入力
     if prompt := st.chat_input("会話テキストを入力..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         
-        # CSVデータベース検索
+        # 検索処理
         suggested_files = pd.DataFrame()
         if not df_db.empty and prompt.strip():
             keywords = prompt.strip().split()
             mask = df_db['keywords'].apply(
                 lambda x: any(kw.lower() in str(x).lower() for kw in keywords)
             )
-            suggested_files = df_db[mask].head(6)
+            suggested_files = df_db[mask].head(4)
             
             if not suggested_files.empty:
                 st.session_state.latest_suggested = suggested_files
