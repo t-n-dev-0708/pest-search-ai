@@ -24,7 +24,7 @@ if "grouped_results" not in st.session_state:
 if "font_size" not in st.session_state:
     st.session_state.font_size = "M"
 if "theme_mode" not in st.session_state:
-    st.session_state.theme_mode = "ライト"
+    st.session_state.theme_mode = "ダーク" # 初期をダークモードに設定
 if "api_key" not in st.session_state:
     st.session_state.api_key = ""
 
