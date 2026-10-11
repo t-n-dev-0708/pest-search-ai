@@ -4,8 +4,8 @@ id,file_name,keywords,thumbnail_path,pdf_path
 3,ショウジョウバエ_生態と誘引トラップ.pdf,ショウジョウバエ コバエ 腐敗物 生態 厨房,dummy_data/thumbnails/thumb_fly_eco.png,dummy_data/pdfs/fly_eco.pdf
 4,アリ_生態と侵入経路特定ガイド.pdf,アリ クロアリ 女王アリ 巣 侵入 生態,dummy_data/thumbnails/thumb_ant_eco.png,dummy_data/pdfs/ant_eco.pdf
 5,トコジラミ_生態と潜伏場所マニュアル.pdf,トコジラミ 吸血 寝具 ホテル 生態,dummy_data/thumbnails/thumb_bedbug_eco.png,dummy_data/pdfs/bedbug_eco.pdf
-6,殺虫剤A_ゴキブリ専用_SDS.pdf,ゴキブリ 殺虫剤 ベイト 毒餌,dummy_data/thumbnails/thumb_pesticide_a.png,dummy_data/pdfs/pesticide_a.pdf
-7,殺虫剤B_ユスリカ・ショウジョウバエ用_SDS.pdf,ユスリカ ショウジョウバエ 殺虫剤 スプレー 駆除,dummy_data/thumbnails/thumb_pesticide_b.png,dummy_data/pdfs/pesticide_b.pdf
-8,殺虫剤C_アリ専用_SDS.pdf,アリ 殺虫剤 毒餌 駆除,dummy_data/thumbnails/thumb_pesticide_c.png,dummy_data/pdfs/pesticide_c.pdf
-9,殺虫剤D_トコジラミ専用_SDS.pdf,トコジラミ 殺虫剤 粉末 駆除,dummy_data/thumbnails/thumb_pesticide_d.png,dummy_data/pdfs/pesticide_d.pdf
-10,殺虫剤E_総合用(ゴキブリ・アリ・ダニ)_SDS.pdf,ゴキブリ アリ ダニ 殺虫剤 乳剤,dummy_data/thumbnails/thumb_pesticide_e.png,dummy_data/pdfs/pesticide_e.pdf
+6,殺虫剤A_SDS.pdf,ゴキブリ 殺虫剤 ベイト 毒餌,dummy_data/thumbnails/thumb_pesticide_a.png,dummy_data/pdfs/pesticide_a.pdf
+7,殺虫剤B_SDS.pdf,ユスリカ ショウジョウバエ 殺虫剤 スプレー 駆除,dummy_data/thumbnails/thumb_pesticide_b.png,dummy_data/pdfs/pesticide_b.pdf
+8,殺虫剤C_SDS.pdf,アリ 殺虫剤 毒餌 駆除,dummy_data/thumbnails/thumb_pesticide_c.png,dummy_data/pdfs/pesticide_c.pdf
+9,殺虫剤D_SDS.pdf,トコジラミ 殺虫剤 粉末 駆除,dummy_data/thumbnails/thumb_pesticide_d.png,dummy_data/pdfs/pesticide_d.pdf
+10,殺虫剤E_SDS.pdf,ゴキブリ アリ ダニ 殺虫剤 乳剤,dummy_data/thumbnails/thumb_pesticide_e.png,dummy_data/pdfs/pesticide_e.pdf
