@@ -1,6 +1,7 @@
 import time
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 from PIL import Image
 
 st.set_page_config(
@@ -32,9 +33,9 @@ html, body, [data-testid="stAppViewContainer"] {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-bottom: 12px;
+    padding-bottom: 8px;
     border-bottom: 1px solid #313244;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 .app-title {
     font-size: 16px;
@@ -81,7 +82,7 @@ html, body, [data-testid="stAppViewContainer"] {
 /* プレビュー枠 */
 .no-image-box {
     background-color: #181825;
-    height: 160px;
+    height: 150px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -106,7 +107,7 @@ html, body, [data-testid="stAppViewContainer"] {
 .log-item {
     font-size: 12px;
     color: #BAC2DE;
-    padding: 8px 10px;
+    padding: 6px 8px;
     border-bottom: 1px solid #1E1E2E;
     font-family: monospace;
 }
@@ -125,13 +126,10 @@ df_db = load_database()
 
 # セッション状態の初期化
 if "transcripts" not in st.session_state:
-    st.session_state.transcripts = [] # 会話ログ（テキストのみ）
+    st.session_state.transcripts = []
 
 if "suggested_data" not in st.session_state:
-    st.session_state.suggested_data = [] # ヒット結果 [{file, hit_kw}]
-
-if "is_listening" not in st.session_state:
-    st.session_state.is_listening = False
+    st.session_state.suggested_data = []
 
 # ヘッダー（左上にアプリ名を常時固定）
 st.markdown("""
@@ -141,24 +139,24 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 左右レイアウト（左 7.5 : 右 2.5）
-col_left, col_right = st.columns([7.5, 2.5])
-
-# --- 検索ロジック ---
-def process_text_input(text):
+# 検索処理関数
+def process_text_input(text, search_filename_only):
     if not text.strip():
         return
     
-    # ログに追加
     st.session_state.transcripts.append(text)
     
-    # CSVデータベース部分一致検索
     if not df_db.empty:
         keywords = text.strip().split()
         hits = []
         for _, row in df_db.iterrows():
-            row_kws = str(row['keywords']).lower()
-            matched_kws = [kw for kw in keywords if kw.lower() in row_kws]
+            file_name = str(row['file_name'])
+            keywords_str = str(row['keywords'])
+            
+            # 検索対象文字列の判定
+            target_str = file_name if search_filename_only else f"{file_name} {keywords_str}"
+            
+            matched_kws = [kw for kw in keywords if kw.lower() in target_str.lower()]
             if matched_kws:
                 hits.append({
                     "id": row['id'],
@@ -169,11 +167,18 @@ def process_text_input(text):
                 })
         
         if hits:
-            st.session_state.suggested_data = hits[:4] # 最大4件
+            st.session_state.suggested_data = hits[:4]
 
-# --- 左カラム：ヒット資料（ホバープレビュー付きカード） ---
+# 左右レイアウト（左 7.5 : 右 2.5）
+col_left, col_right = st.columns([7.5, 2.5])
+
+# --- 左カラム：検索オプション ＆ ヒット資料 ---
 with col_left:
-    st.markdown("<div style='font-size:12px; font-weight:700; color:#A6ADC8; margin-bottom:10px;'>MATCHED KNOWLEDGE</div>", unsafe_allow_html=True)
+    st.markdown("<div style='font-size:12px; font-weight:700; color:#A6ADC8;'>MATCHED KNOWLEDGE</div>", unsafe_allow_html=True)
+    
+    # ファイル名のみ検索対象にするかのチェックボックス
+    search_filename_only = st.checkbox("ファイル名のみを検索対象にする（オフ時はキーワード・本文も含める）", value=False)
+    st.write("")
     
     if not st.session_state.suggested_data:
         st.markdown("<div style='color:#585B70; font-size:12px; padding-top:40px;'>会話やキーワードから該当するマニュアルがここに表示されます</div>", unsafe_allow_html=True)
@@ -181,7 +186,6 @@ with col_left:
         cols = st.columns(4)
         for idx, item in enumerate(st.session_state.suggested_data):
             with cols[idx]:
-                # カードコンテナ（ホバーでズーム）
                 card_html = f"""
                 <div class="file-card" title="{item['file_name']} (クリックで参照)">
                     <div class="keyword-tag">MATCH: {item['hit_kw']}</div>
@@ -189,7 +193,6 @@ with col_left:
                 """
                 st.markdown(card_html, unsafe_allow_html=True)
                 
-                # 画像またはダミープレビュー
                 try:
                     img = Image.open(item['thumbnail_path'])
                     st.image(img, use_container_width=True)
@@ -198,18 +201,25 @@ with col_left:
                 
                 st.markdown('</div>', unsafe_allow_html=True)
 
-# --- 右カラム：会話・文字起こしログ ＆ 音声・キーワード入力 ---
+# --- 音声入力（URLクエリ経由での受け取りチェック） ---
+query_params = st.query_params
+if "voice" in query_params:
+    voice_text = query_params["voice"]
+    st.query_params.clear()
+    process_text_input(voice_text, search_filename_only)
+    st.rerun()
+
+# --- 右カラム：会話・文字起こしログ ＆ Web Speech API 音声入力 ＆ テキスト入力 ---
 with col_right:
-    st.markdown("<div style='font-size:12px; font-weight:700; color:#A6ADC8; margin-bottom:10px;'>TRANSCRIPTION LOG</div>", unsafe_allow_html=True)
+    st.markdown("<div style='font-size:12px; font-weight:700; color:#A6ADC8; margin-bottom:6px;'>TRANSCRIPTION LOG</div>", unsafe_allow_html=True)
     
-    # ログクリアボタン
     if st.button("ログ消去", use_container_width=True):
         st.session_state.transcripts = []
         st.session_state.suggested_data = []
         st.rerun()
 
     # 文字起こしログ（固定高エリア）
-    log_container = st.container(height=380)
+    log_container = st.container(height=320)
     with log_container:
         if not st.session_state.transcripts:
             st.markdown("<div style='color:#45475A; font-size:11px;'>ログなし</div>", unsafe_allow_html=True)
@@ -217,19 +227,69 @@ with col_right:
             for log in reversed(st.session_state.transcripts):
                 st.markdown(f'<div class="log-item">> {log}</div>', unsafe_allow_html=True)
 
-    # 音声入力＆テキスト入力エリア
-    st.write("")
-    
-    # 音声入力トグルボタン（擬似音声ストリーミングUI）
-    btn_label = "⏹️ 音声聞き取り停止" if st.session_state.is_listening else "🎙️ 音声入力を開始"
-    if st.button(btn_label, use_container_width=True):
-        st.session_state.is_listening = not st.session_state.is_listening
-        st.rerun()
+    # 1. HTML5 / Web Speech API によるマイク音声入力コンポーネント
+    speech_js = """
+    <div style="font-family: sans-serif; background: transparent;">
+        <button id="mic-btn" style="width: 100%; padding: 8px; background-color: #1E1E2E; color: #89B4FA; border: 1px solid #313244; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s;">
+            🎙️ 音声入力を開始 (マイク)
+        </button>
+        <div id="mic-status" style="color: #7F849C; font-size: 10px; margin-top: 4px; text-align: center;">Chrome / Edge / Safari 対応</div>
+    </div>
 
-    if st.session_state.is_listening:
-        st.caption("🔴 音声聞き取り中...（キーワードを発話）")
+    <script>
+        const btn = document.getElementById('mic-btn');
+        const status = document.getElementById('mic-status');
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    # 手動テキスト / キーワード入力
-    if input_text := st.chat_input("キーワードまたは会話を入力..."):
-        process_text_input(input_text)
+        if (!SpeechRecognition) {
+            status.innerText = "※お使いのブラウザは音声認識非対応です";
+            btn.disabled = true;
+            btn.style.opacity = "0.5";
+        } else {
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'ja-JP';
+            recognition.interimResults = false;
+            let isListening = false;
+
+            btn.onclick = () => {
+                if (isListening) {
+                    recognition.stop();
+                } else {
+                    recognition.start();
+                }
+            };
+
+            recognition.onstart = () => {
+                isListening = true;
+                btn.innerText = "🔴 聞き取り中...（発話してください）";
+                btn.style.backgroundColor = "#F38BA8";
+                btn.style.color = "#11111B";
+                status.innerText = "マイクで会話を検出中";
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                btn.innerText = "🎙️ 音声入力を開始 (マイク)";
+                btn.style.backgroundColor = "#1E1E2E";
+                btn.style.color = "#89B4FA";
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                status.innerText = "検出: " + transcript;
+                const targetUrl = window.parent.location.pathname + '?voice=' + encodeURIComponent(transcript);
+                window.parent.location.href = targetUrl;
+            };
+
+            recognition.onerror = (event) => {
+                status.innerText = "エラー: " + event.error;
+            };
+        }
+    </script>
+    """
+    components.html(speech_js, height=65)
+
+    # 2. 手動テキスト / キーワード入力
+    if input_text := st.chat_input("キーワード入力..."):
+        process_text_input(input_text, search_filename_only)
         st.rerun()
