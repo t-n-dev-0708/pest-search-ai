@@ -1,25 +1,41 @@
-# 🎈 Blank app template
+# 🐛 PestSearch AI (害虫検索 AI)
 
-A simple Streamlit app template for you to modify!
+商談や現場ヒアリング中の会話をリアルタイムで音声認識・テキスト解析し、文脈に応じた害虫対策マニュアルや殺虫剤のSDS（安全データシート）を自動で即座にサジェストするスクリーンスポット型アシスタントツールです。
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://blank-app-template.streamlit.app/)
+---
 
-### How to run it on your own machine
+## 🌟 主な機能・特長
 
-Prerequisite: install `uv` if you don't already have it.
+- **🎙️ リアルタイム音声聞き取り (Web Speech API)**
+  ブラウザのマイク機能を利用し、ユーザーの連続した発話を常時バックグラウンドで文字起こしします。
+- **💡 ナレッジ自動サジェスト & グループ化**
+  会話ログから害虫の名前（ゴキブリ、ユスリカ、ショウジョウバエ等）を自動検出し、対応する対策マニュアルや殺虫剤資料を虫の種類ごとにカテゴリ分類して即座に画面にカード表示します。
+- **✨ Gemini API による文字起こしAI補正**
+  音声認識特有の誤認識（例：「スイカ」→「ユスリカ」、「症状外」→「ショウジョウバエ」、「声帯」→「生態」など）を、害虫駆除の文脈を読み取ってGemini 2.5 Flashがワンタップで自動校正します。
+- **🖥️ 画面内収容（スクロールフリー）デザイン**
+  100%表示時でも全体スクロールバーが出ない、コンパクトで洗練されたダッシュボード形式のUI。ホバーでのカードプレビュー拡大演出に対応しています。
+- **⚙️ 柔軟な表示・検索設定**
+  - **「ファイル名のみ検索」切り替え**: オン時はファイル名一致のみ、オフ時はメタデータ（キーワード）含め全体検索。
+  - **テーマ切替**: エキスパンダー設定内から「ダークモード」「ライトモード」の切り替えが可能。
+  - **文字サイズ切替**: ボタンで「S」「M」「L」のサイズ変更が可能。
+  - **Google Drive連携枠**: 将来の機能拡張を見据えた参照ドライブURL入力エリア。
 
-```
-$ curl -LsSf https://astral.sh/uv/install.sh | sh
-```
+---
 
-1. Sync the dependencies
+## 📁 構成ファイル
 
-   ```
-   $ uv sync
-   ```
+- `streamlit_app.py`: メインアプリケーション（Streamlit）
+- `database.csv`: 害虫マニュアル・殺虫剤データのインデックスファイル
+- `requirements.txt`: Python依存パッケージリスト
+- `README.md`: 本ドキュメント
 
-2. Run the app
+---
 
-   ```
-   $ uv run streamlit run streamlit_app.py
-   ```
+## 🚀 動作環境・セットアップ
+
+### 1. リポジトリのクローンと依存パッケージのインストール
+
+```bash
+git clone [https://github.com/YOUR_USERNAME/pest-search-ai.git](https://github.com/YOUR_USERNAME/pest-search-ai.git)
+cd pest-search-ai
+pip install -r requirements.txt
