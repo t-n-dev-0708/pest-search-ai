@@ -18,7 +18,7 @@ TARGET_PESTS = ["ゴキブリ", "アリ", "ユスリカ", "ネズミ", "ハチ",
 if "transcripts" not in st.session_state:
     st.session_state.transcripts = []
 if "search_filename_only" not in st.session_state:
-    st.session_state.search_filename_only = False
+    st.session_state.search_filename_only = True  # デフォルトでON
 if "grouped_results" not in st.session_state:
     st.session_state.grouped_results = {}
 if "font_size" not in st.session_state:
@@ -42,7 +42,7 @@ if st.session_state.theme_mode == "ダーク":
     hl_bg, hl_text = "#F9E2AF", "#11111B"
 else:
     bg_body, bg_card, card_border, card_accent = "#F4F6F9", "#FFFFFF", "#DEE2E6", "#007BFF"
-    text_color, sub_text, input_bg = "#212529", "#6C757D", "#FFFFFF"
+    text_color, sub_text, input_bg = "#FFFFFF", "#6C757D", "#FFFFFF"
     hl_bg, hl_text = "#FFE066", "#000000"
 
 st.markdown(f"""
@@ -120,19 +120,26 @@ def process_text_input(text):
 # --- アプリヘッダー & コントロールバー ---
 st.markdown('<div class="top-header"><div class="app-title">害虫検索 AI (PestSearch AI)</div></div>', unsafe_allow_html=True)
 
-ctrl_col1, ctrl_col2, col_s, col_m, col_l, ctrl_col4 = st.columns([4.0, 0.8, 0.4, 0.4, 0.4, 2.0])
-with ctrl_col1: st.text_input("検索対象フォルダ (Google Drive URL)", placeholder="https://drive.google.com/drive/folders/...", label_visibility="collapsed")
+ctrl_col1, ctrl_col2, ctrl_col3 = st.columns([5.0, 3.0, 2.0])
+
+with ctrl_col1: 
+    st.text_input("検索対象フォルダ", placeholder="参照させたいGoogleドライブのURL", label_visibility="collapsed")
+
 with ctrl_col2:
-    if st.button("☀️ ライト" if st.session_state.theme_mode == "ダーク" else "🌙 ダーク", use_container_width=True):
-        st.session_state.theme_mode = "ライト" if st.session_state.theme_mode == "ダーク" else "ダーク"
-        st.rerun()
-with col_s:
-    if st.button("S", type="primary" if st.session_state.font_size == "S" else "secondary", use_container_width=True): st.session_state.font_size = "S"; st.rerun()
-with col_m:
-    if st.button("M", type="primary" if st.session_state.font_size == "M" else "secondary", use_container_width=True): st.session_state.font_size = "M"; st.rerun()
-with col_l:
-    if st.button("L", type="primary" if st.session_state.font_size == "L" else "secondary", use_container_width=True): st.session_state.font_size = "L"; st.rerun()
-with ctrl_col4:
+    with st.expander("⚙️ UI設定", expanded=False):
+        col_t, col_s, col_m, col_l = st.columns([1, 0.6, 0.6, 0.6])
+        with col_t:
+            if st.button("☀️ ライト" if st.session_state.theme_mode == "ダーク" else "🌙 ダーク", use_container_width=True):
+                st.session_state.theme_mode = "ライト" if st.session_state.theme_mode == "ダーク" else "ダーク"
+                st.rerun()
+        with col_s:
+            if st.button("S", type="primary" if st.session_state.font_size == "S" else "secondary", use_container_width=True): st.session_state.font_size = "S"; st.rerun()
+        with col_m:
+            if st.button("M", type="primary" if st.session_state.font_size == "M" else "secondary", use_container_width=True): st.session_state.font_size = "M"; st.rerun()
+        with col_l:
+            if st.button("L", type="primary" if st.session_state.font_size == "L" else "secondary", use_container_width=True): st.session_state.font_size = "L"; st.rerun()
+
+with ctrl_col3:
     chk_val = st.checkbox("ファイル名のみ検索", value=st.session_state.search_filename_only)
     if chk_val != st.session_state.search_filename_only:
         st.session_state.search_filename_only = chk_val
