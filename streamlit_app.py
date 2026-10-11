@@ -5,49 +5,47 @@ from PIL import Image
 
 st.set_page_config(
     page_title="PestSearch AI",
-    page_icon="🐛",
     layout="wide",
 )
 
-# --- カスタムCSS（UI改善用） ---
+# --- カスタムCSS（アイコン削除＆カードサイズ固定） ---
 st.markdown("""
 <style>
-/* サジェストエリア全体のコンパクト化 */
+/* サジェストエリア枠 */
 .suggest-container {
     background-color: #1E1E2E;
-    border-radius: 10px;
-    padding: 15px;
-    margin-top: 10px;
-    margin-bottom: 20px;
-    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 12px;
+    margin-bottom: 16px;
+    border: 1px solid #313244;
 }
-/* No Imageのプレースホルダーを大きく、目立つように */
+/* No Imageのプレースホルダー（高さ固定） */
 .no-image-box {
-    background-color: #2D2D3D;
-    height: 150px;
+    background-color: #181825;
+    height: 140px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    color: #888;
-    font-size: 14px;
-    text-align: center;
-    border: 2px dashed #444;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    color: #A6ADC8;
+    font-size: 13px;
+    border: 1px dashed #45475A;
 }
-/* ファイル名の表示スタイル */
+/* ファイル名ラベル（一列で省略表示） */
 .file-name-label {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    color: #E0E0E0;
+    color: #CDD6F4;
     margin-bottom: 8px;
     display: block;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-/* ダウンロードボタンの幅を100%に */
-.stDownloadButton button {
+/* ボタンサイズ統一 */
+.stDownloadButton button, .stButton button {
     width: 100%;
 }
 </style>
@@ -66,63 +64,62 @@ df_db = load_database()
 
 # --- サイドバー ---
 with st.sidebar:
-    st.header("⚙️ 設定")
-    if st.button("🗑️ 会話をリセット", use_container_width=True):
+    st.header("設定")
+    if st.button("会話をリセット", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
 
-st.title("🐛 害虫対策ナレッジサジェスト (PestSearch AI)")
+st.title("害虫対策ナレッジサジェスト (PestSearch AI)")
 st.caption("入力されたキーワードから関連する対策資料・マニュアルを検索します。")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# --- サムネイル・資料の描画関数（UI改善版） ---
+# --- サムネイル・資料の描画関数（サイズ固定版） ---
 def draw_suggested_files(suggested_files):
     if suggested_files.empty:
         return
     
-    # 全体を囲むコンテナ（CSS適用）
     st.markdown('<div class="suggest-container">', unsafe_allow_html=True)
-    st.markdown("💡 **参考資料が見つかりました**")
+    st.markdown("**参考資料**")
     
-    # 最大3列でコンパクトに配置
-    cols = st.columns(min(len(suggested_files), 3))
+    # 常に4列固定にすることで、件数によってカード幅が変動するのを防ぐ
+    cols = st.columns(4)
     
     for idx, row in suggested_files.reset_index().iterrows():
-        col_idx = idx % 3 
-        with cols[col_idx]:
-            # ファイル名を上に配置
-            st.markdown(f'<span class="file-name-label" title="{row["file_name"]}">📄 {row["file_name"]}</span>', unsafe_allow_html=True)
+        if idx >= 4:
+            break
+        with cols[idx]:
+            # ファイル名
+            st.markdown(f'<span class="file-name-label" title="{row["file_name"]}">{row["file_name"]}</span>', unsafe_allow_html=True)
             
-            # サムネイル画像の表示（ダミー画像がない場合は大きなプレースホルダー）
+            # サムネイル表示（固定枠）
             try:
                 img = Image.open(row['thumbnail_path'])
                 st.image(img, use_container_width=True)
             except:
-                # CSSでデザインしたNo Image枠を表示
-                st.markdown(f'<div class="no-image-box">プレビュー画像なし<br>(ダミー)</div>', unsafe_allow_html=True)
+                st.markdown('<div class="no-image-box">PREVIEW NO IMAGE</div>', unsafe_allow_html=True)
             
             # ダウンロードボタン
             try:
                 with open(row['pdf_path'], "rb") as f:
                     st.download_button(
-                        label="開く",
+                        label="ファイルを開く",
                         data=f,
                         file_name=row['file_name'],
                         mime="application/pdf",
                         key=f"dl_{row['id']}_{time.time()}_{idx}",
-                        use_container_width=True # ボタン幅を広げる
+                        use_container_width=True
                     )
             except:
                 st.button("ファイルなし", disabled=True, key=f"dl_err_{row['id']}_{time.time()}_{idx}", use_container_width=True)
                 
     st.markdown('</div>', unsafe_allow_html=True)
 
-# --- 過去ログの描画 ---
+# --- 過去ログの描画（アバターの絵文字を排除） ---
 for message in st.session_state.messages:
-    avatar = "👤" if message["role"] == "user" else "🤖"
-    with st.chat_message(message["role"], avatar=avatar):
+    avatar_val = "user" if message["role"] == "user" else "assistant"
+    with st.chat_message(message["role"]):
         if message.get("content"):
             st.markdown(message["content"])
         if "suggested_files" in message and not message["suggested_files"].empty:
