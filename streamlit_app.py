@@ -141,55 +141,63 @@ if "search_filename_only" not in st.session_state:
 if "grouped_results" not in st.session_state:
     st.session_state.grouped_results = {}
 
-# --- 全ログに対する再検索・判定ロジック ---
+# --- 全ログに対する正確な検索・判定ロジック ---
 def recalculate_matches():
     if df_db.empty or not st.session_state.transcripts:
         st.session_state.grouped_results = {}
         return
     
     search_only_fn = st.session_state.search_filename_only
-    all_transcripts_text = " ".join(st.session_state.transcripts)
+    all_transcripts_text = " ".join(st.session_state.transcripts).lower()
 
-    # DBから検索キーワードの候補を集計
-    potential_kws = set()
+    # 1. 検索用キーワード辞書の構築
+    dict_keywords = set()
     for _, row in df_db.iterrows():
-        fn = str(row['file_name']).replace('.pdf', '')
-        for k in re.split(r'[_ \s]+', fn):
-            if len(k.strip()) >= 2:
-                potential_kws.add(k.strip())
+        # keywords列の単語を追加
+        kws = str(row['keywords']).split()
+        for k in kws:
+            if k.strip():
+                dict_keywords.add(k.strip())
         
-        if not search_only_fn:
-            for k in str(row['keywords']).split():
-                if len(k.strip()) >= 1:
-                    potential_kws.add(k.strip())
+        # file_nameから単語を抽出して追加（例: ゴキブリ, 駆除, マニュアル, 料金表 など）
+        fn_clean = str(row['file_name']).replace('.pdf', '')
+        fn_words = re.split(r'[_ \s\.\-]+', fn_clean)
+        for w in fn_words:
+            if len(w.strip()) >= 2:
+                dict_keywords.add(w.strip())
 
+    # 2. 会話ログに含まれるキーワードを検出
+    detected_keywords = set()
+    for kw in dict_keywords:
+        if kw.lower() in all_transcripts_text:
+            detected_keywords.add(kw)
+
+    # 3. 検出されたキーワードごとに該当ファイルを正しくフィルタリング
     grouped = {}
-    for kw in potential_kws:
-        if kw.lower() in all_transcripts_text.lower():
-            for _, row in df_db.iterrows():
-                file_name = str(row['file_name'])
-                keywords_str = str(row['keywords'])
+    for kw in detected_keywords:
+        matched_files = []
+        for _, row in df_db.iterrows():
+            file_name = str(row['file_name'])
+            keywords_str = str(row['keywords'])
+            
+            if search_only_fn:
+                # ファイル名のみに含まれるか判定
+                is_match = kw.lower() in file_name.lower()
+            else:
+                # ファイル名またはkeywords列に含まれるか判定
+                is_match = (kw.lower() in file_name.lower()) or (kw.lower() in keywords_str.lower())
                 
-                # マッチ判定
-                is_match = False
-                if search_only_fn:
-                    if kw.lower() in file_name.lower():
-                        is_match = True
-                else:
-                    if kw.lower() in file_name.lower() or kw.lower() in keywords_str.lower():
-                        is_match = True
-                        
-                if is_match:
-                    if kw not in grouped:
-                        grouped[kw] = []
-                    if not any(f['id'] == row['id'] for f in grouped[kw]):
-                        grouped[kw].append({
-                            "id": row['id'],
-                            "file_name": row['file_name'],
-                            "thumbnail_path": row['thumbnail_path'],
-                            "pdf_path": row['pdf_path']
-                        })
-                        
+            if is_match:
+                matched_files.append({
+                    "id": row['id'],
+                    "file_name": row['file_name'],
+                    "thumbnail_path": row['thumbnail_path'],
+                    "pdf_path": row['pdf_path']
+                })
+        
+        if matched_files:
+            grouped[kw] = matched_files
+
     st.session_state.grouped_results = grouped
 
 def process_text_input(text):
@@ -228,7 +236,7 @@ with col_left:
         key="chk_fn_only"
     )
     
-    # チェックボックスの状態変更時に即時再計算
+    # チェックボックス変更時の即時反映
     if chk_val != st.session_state.search_filename_only:
         st.session_state.search_filename_only = chk_val
         recalculate_matches()
