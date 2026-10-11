@@ -230,14 +230,17 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# --- コントロールバー（Drive URL / 設定） ---
-ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4 = st.columns([4.5, 1.5, 1.5, 2.5])
+# --- コントロールバー（Drive URL / アイコン切替 / サイズ / オプション） ---
+ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4 = st.columns([5.2, 0.8, 1.2, 2.8])
 
 with ctrl_col1:
     st.text_input("検索対象フォルダ (Google Drive URL)", placeholder="https://drive.google.com/drive/folders/...", label_visibility="collapsed")
 
 with ctrl_col2:
-    st.session_state.theme_mode = st.selectbox("表示モード", ["ダーク", "ライト"], index=0 if st.session_state.theme_mode == "ダーク" else 1, label_visibility="collapsed")
+    theme_icon = "☀️" if st.session_state.theme_mode == "ダーク" else "🌙"
+    if st.button(theme_icon, help="テーマ切り替え", use_container_width=True):
+        st.session_state.theme_mode = "ライト" if st.session_state.theme_mode == "ダーク" else "ダーク"
+        st.rerun()
 
 with ctrl_col3:
     st.session_state.font_size = st.selectbox("文字サイズ", ["S", "M", "L"], index=["S", "M", "L"].index(st.session_state.font_size), label_visibility="collapsed")
@@ -260,7 +263,7 @@ if "voice" in query_params:
 # 左右メインレイアウト
 col_left, col_right = st.columns([7.2, 2.8])
 
-# --- 左カラム：検出資料（シンプル化見出し＋インデント） ---
+# --- 左カラム：検出資料 ---
 with col_left:
     if not st.session_state.grouped_results:
         st.markdown(f"<div style='color:{sub_text}; font-size:{fs['base']}; padding-top:40px; text-align:center;'>会話ログからキーワードが検出されると、ここに該当資料が表示されます</div>", unsafe_allow_html=True)
@@ -268,7 +271,6 @@ with col_left:
         left_container = st.container(height=500)
         with left_container:
             for kw, files in st.session_state.grouped_results.items():
-                # シンプル見出し（例：[ゴキブリ] 2）
                 st.markdown(f'''
                 <div class="kw-tag-header">
                     <span class="kw-badge">{kw}</span>
@@ -276,7 +278,6 @@ with col_left:
                 </div>
                 ''', unsafe_allow_html=True)
                 
-                # インデントブロック
                 st.markdown('<div class="indent-block">', unsafe_allow_html=True)
                 cols = st.columns(4)
                 for idx, item in enumerate(files):
@@ -294,7 +295,7 @@ with col_left:
                         st.markdown('</div>', unsafe_allow_html=True)
                 st.markdown('</div>', unsafe_allow_html=True)
 
-# --- 右カラム：会話ログ ＆ 常時音声認識 / 手動入力 ---
+# --- 右カラム：会話ログ ＆ 音声/手動入力 ---
 with col_right:
     st.markdown(f"<div style='font-size:{fs['header']}; font-weight:700; color:{text_color}; margin-bottom:4px;'>会話・文字起こしログ</div>", unsafe_allow_html=True)
     
@@ -303,7 +304,6 @@ with col_right:
         st.session_state.grouped_results = {}
         st.rerun()
 
-    # ハイライト用キーワードの作成
     all_registered_kws = set()
     if not df_db.empty:
         for kws in df_db['keywords'].dropna():
